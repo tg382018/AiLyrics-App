@@ -35,4 +35,12 @@ export class SongsController {
   async generateSong(@Body() dto: GenerateSongDto, @Request() req) {
     return this.songsService.generateSong(dto, req.user.userId);
   }
+
+    // ✅ 🔥 Kullanıcının kendi şarkıları
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @Get('my')
+  async getMySongs(@Request() req) {
+    return this.songsService.findByUser(req.user.userId);
+  }
 }

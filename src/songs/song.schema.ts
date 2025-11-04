@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { PromptHistory } from 'src/prompts/prompt-history.schema';
 
 @Schema({ timestamps: true })
 export class Song extends Document {
@@ -14,6 +15,9 @@ export class Song extends Document {
   @Prop() verses: string;
   @Prop() creativity: number;
   @Prop() createdBy: string; // user id (ileride auth eklendiğinde)
+
+    @Prop({ type: Types.ObjectId, ref: 'PromptHistory' })
+  prompt?: PromptHistory;
 }
 
 export const SongSchema = SchemaFactory.createForClass(Song);

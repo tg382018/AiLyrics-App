@@ -6,6 +6,7 @@ import { SongsModule } from './songs/songs.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { PromptsModule } from './prompts/prompts.module';
 
 
 
@@ -21,7 +22,8 @@ import { AuthModule } from './auth/auth.module';
     MongooseModule.forRoot(process.env.MONGO_URI || ''),
     SongsModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    PromptsModule
   ],
   controllers: [AppController],
   providers: [AppService],
