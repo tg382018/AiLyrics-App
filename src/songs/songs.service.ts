@@ -1,11 +1,12 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Song } from './song.schema';
 import { GenerateSongDto } from './dto/generate-song.dto';
 import { CreateSongDto } from './dto/create-song.dto';
 import { LlmService } from '../llm/llm.service';
 import { PromptsService } from '../prompts/prompts.service'; // 💡 eklendi
+import { User } from '../users/users.schema'; // üst kısma ekle
 
 @Injectable()
 export class SongsService {
@@ -33,7 +34,7 @@ export class SongsService {
     startOfDay.setHours(0, 0, 0, 0);
 
     const todayCount = await this.songModel.countDocuments({
-      createdBy: userId,
+      createdBy: new Types.ObjectId(userId), // 🔥 string değil ObjectId
       createdAt: { $gte: startOfDay },
     });
 
@@ -78,11 +79,97 @@ export class SongsService {
     return savedSong;
   }
 
-  async findByUser(userId: string): Promise<Song[]> {
-  return this.songModel
-    .find({ createdBy: userId })
-    .sort({ createdAt: -1 })
-    .exec();
+ async findByUser(userId: string, page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+
+  const [songs, total] = await Promise.all([
+    this.songModel
+      .find({ createdBy: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec(),
+    this.songModel.countDocuments({ createdBy: userId }),
+  ]);
+
+  return {
+    data: songs,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
+
+
+async findPopular(): Promise<any[]> {
+  const songs = await this.songModel
+    .find()
+    .sort({ likeCount: -1 })
+    .limit(10)
+    .populate({
+      path: 'createdBy',
+      model: 'User',
+      select: 'username email',
+    })
+    .exec();
+
+  return songs.map(song => ({
+    id: song._id,
+    title: song.title,
+    likeCount: song.likeCount,
+    mood: song.mood,
+    genre: song.genre,
+    createdAt: song.createdAt,
+    createdBy: {
+      id: song.createdBy?._id,
+      username: song.createdBy?.username || 'Anonim',
+      email: song.createdBy?.email,
+    },
+  }));
+}
+
+async countSongs(): Promise<number> {
+  return this.songModel.countDocuments();
+}
+
+async getUserSongCounts() {
+  const results = await this.songModel.aggregate([
+    {
+      $group: {
+        _id: '$createdBy',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'user',
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        userId: '$_id',
+        username: '$user.username',
+        email: '$user.email',
+        songCount: '$count',
+      },
+    },
+  ]);
+
+  return results;
+}
+
 
 }

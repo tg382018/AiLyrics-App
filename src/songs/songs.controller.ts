@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/common';
 import { ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { SongsService } from './songs.service';
 import { CreateSongDto } from './dto/create-song.dto';
@@ -40,7 +40,16 @@ export class SongsController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @Get('my')
-  async getMySongs(@Request() req) {
-    return this.songsService.findByUser(req.user.userId);
+  async getMySongs(@Request() req,
+  @Query('page') page = 1,
+  @Query('limit') limit = 10,
+) {
+    return this.songsService.findByUser(req.user.userId,Number(page), Number(limit));
+  }
+
+    // 🔥 Popüler şarkılar
+  @Get('popular')
+  async getPopularSongs() {
+    return this.songsService.findPopular();
   }
 }

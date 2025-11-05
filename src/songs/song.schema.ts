@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { PromptHistory } from 'src/prompts/prompt-history.schema';
+import { User } from 'src/users/users.schema';
 
 @Schema({ timestamps: true })
 export class Song extends Document {
@@ -14,10 +15,21 @@ export class Song extends Document {
   @Prop() era: string;
   @Prop() verses: string;
   @Prop() creativity: number;
-  @Prop() createdBy: string; // user id (ileride auth eklendiğinde)
 
-    @Prop({ type: Types.ObjectId, ref: 'PromptHistory' })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  createdBy: User;
+
+  @Prop({ type: Types.ObjectId, ref: 'PromptHistory' })
   prompt?: PromptHistory;
+
+  @Prop({ default: 0 })
+  likeCount: number;
+
+  // 👇 Bunları ekle
+  @Prop() createdAt?: Date;
+  @Prop() updatedAt?: Date;
+
+  
 }
 
 export const SongSchema = SchemaFactory.createForClass(Song);

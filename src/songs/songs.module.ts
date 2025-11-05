@@ -14,5 +14,7 @@ import { PromptsModule } from 'src/prompts/prompts.module';
   ],
   controllers: [SongsController],
   providers: [SongsService],
+    exports: [SongsService], // ✅ BURASI EKLENDİ
+
 })
 export class SongsModule {}

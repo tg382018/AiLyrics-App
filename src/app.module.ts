@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PromptsModule } from './prompts/prompts.module';
+import { LikesModule } from './likes/likes.module';
+import { CommentsModule } from './comments/comments.module';
+import { AdminModule } from './admin/admin.module';
 
 
 
@@ -23,7 +26,10 @@ import { PromptsModule } from './prompts/prompts.module';
     SongsModule,
     UsersModule,
     AuthModule,
-    PromptsModule
+    PromptsModule,
+    LikesModule,
+     CommentsModule,
+        AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

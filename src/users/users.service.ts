@@ -141,4 +141,8 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ email });
   }
+
+  async countUsers(): Promise<number> {
+  return this.userModel.countDocuments();
+}
 }
