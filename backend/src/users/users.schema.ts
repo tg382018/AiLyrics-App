@@ -1,31 +1,45 @@
-    import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
-  @Prop({ required: true })
-  username: string;
+  // 🔹 Temel bilgiler
+  @Prop()
+  username?: string; // Google'dan gelenlerde olmayabilir
 
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
-  password: string;
+  @Prop()
+  password?: string; // Google kullanıcılarında olmayacak
 
+  // 🔹 Rol
   @Prop({ default: 'user' })
   role: string;
 
-    // 🔹 VERIFICATION
+  // 🔹 Doğrulama
   @Prop({ default: false })
   isVerified: boolean;
 
   @Prop()
   verificationToken?: string;
 
-    // 🔹 RESET PW
-    @Prop() resetPasswordToken?: string;
-    @Prop() resetPasswordExpires?: Date;
+  // 🔹 Şifre sıfırlama
+  @Prop()
+  resetPasswordToken?: string;
 
+  @Prop()
+  resetPasswordExpires?: Date;
+
+  // 🔹 Sosyal giriş bilgileri
+  @Prop()
+  provider?: string; // örn: 'local' | 'google'
+
+  @Prop()
+  googleId?: string; // Google kullanıcıları için ek ID
+
+  @Prop()
+  profileImage?: string; // Google profil resmi
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

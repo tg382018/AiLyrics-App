@@ -7,6 +7,7 @@ import {
   Request,
   Query,
   Res,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
@@ -24,6 +25,23 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+    const result = await this.authService.googleLogin(req.user);
+
+    // 🎯 Kullanıcıyı frontend'e yönlendiriyoruz
+    const frontendUrl =
+      process.env.FRONTEND_URL ?? 'http://localhost:3005';
+    const redirectUrl = `${frontendUrl.replace(/\/$/, '')}/app/login/success?token=${result.token}`;
+    return res.redirect(redirectUrl);
+  }
+  
   // ✅ 1️⃣ Kullanıcı kayıt (doğrulama maili ile)
   @Post('register')
   async register(@Body() dto: CreateUserDto) {

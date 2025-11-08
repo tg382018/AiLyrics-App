@@ -127,6 +127,10 @@ export class UsersService {
         'E-posta adresiniz doğrulanmamış. Lütfen e-postanızı kontrol edin.',
       );
 
+      if (!user.password) {
+  // Örneğin Google ile kayıt olmuş kullanıcılar
+  throw new UnauthorizedException('Bu hesap için şifreli giriş yapılamaz.');
+}
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new UnauthorizedException('Hatalı şifre.');
 
