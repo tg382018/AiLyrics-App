@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { REDIRECT_STORAGE_KEY } from "@/lib/api";
 import { AuthShell } from "../../_components/auth-shell";
@@ -11,6 +11,20 @@ import { useAuth } from "../../_contexts/auth-context";
 const DEFAULT_REDIRECT = "/app/me";
 
 export default function LoginSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#0A0015] text-white/70">
+          Finalizing login…
+        </div>
+      }
+    >
+      <LoginSuccessView />
+    </Suspense>
+  );
+}
+
+function LoginSuccessView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { completeOAuthLogin, authLoading } = useAuth();
