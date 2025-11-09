@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -130,7 +131,13 @@ export default function LoginPage() {
           onClick={handleGoogleLogin}
           className="flex w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white px-6 py-3 text-sm font-semibold text-[#12031F] transition hover:bg-white/90"
         >
-          <span className="text-lg">🟩</span>
+          <Image
+            src="/googleicon.webp"
+            alt="Google icon"
+            width={20}
+            height={20}
+            className="h-5 w-5"
+          />
           Sign in with Google
         </button>
 

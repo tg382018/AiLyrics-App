@@ -79,7 +79,7 @@ const heroTitleWords = [
 export default function Home() {
   return (
     <AuroraBackground
-      className="font-sans flex-col items-center justify-start text-white"
+      className="font-sans flex-col items-center justify-start overflow-visible px-0 text-white"
       containerClassName="relative z-10 flex w-full max-w-6xl flex-col items-center gap-24"
     >
       <section className="w-full px-6 pt-12 text-center text-white sm:text-left lg:pt-20">
@@ -211,6 +211,28 @@ Every word runs back to you, across these quiet lands.`}
               <p className="text-xs text-white/60">{stat.note}</p>
             </div>
           ))}
+        </section>
+
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-sky-500/10 via-purple-500/10 to-fuchsia-500/10 p-12 text-center text-white shadow-[0_20px_60px_rgba(15,23,42,0.55)]">
+          <div className="absolute -left-24 top-6 h-40 w-40 animate-pulse rounded-full bg-sky-400/30 blur-3xl" />
+          <div className="absolute -right-16 bottom-10 h-44 w-44 animate-[spin_18s_linear_infinite] rounded-full border border-white/10" />
+          <div className="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-3xl" />
+          <div className="relative space-y-5">
+            <h2 className="text-3xl font-semibold md:text-4xl">
+              Need a hand with your next lyric?
+            </h2>
+            <p className="mx-auto max-w-2xl text-white/80">
+              Whether you’re planning a release, setting up a writers camp or curious about the roadmap, drop us a line.
+              We usually reply within a day.
+            </p>
+            <a
+              href="mailto:tgulck@gmail.com"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white/90 px-8 py-3 text-base font-semibold text-neutral-900 shadow-[0_18px_40px_rgba(59,130,246,0.35)] transition hover:bg-white"
+            >
+              <span className="text-lg">✉️</span>
+              Contact us
+            </a>
+          </div>
         </section>
 
         <section id="features" className="space-y-12 text-white">
@@ -355,46 +377,45 @@ Every word runs back to you, across these quiet lands.`}
             ))}
           </div>
         </section>
-
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-10 text-center text-white shadow-[0_20px_60px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 via-transparent to-indigo-500/20 opacity-70 blur-3xl" />
-          <div className="relative space-y-4">
-            <h2 className="text-3xl font-semibold md:text-4xl">
-              Rediscover your creative momentum
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-10 text-white shadow-[0_20px_60px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
+          <div className="absolute -top-20 left-1/2 h-48 w-[120%] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-500/20 via-sky-500/10 to-purple-500/20 blur-3xl" />
+          <div className="relative space-y-6">
+            <h2 className="text-center text-3xl font-semibold md:text-4xl">
+              Frequently asked questions
             </h2>
-            <p className="text-base text-white/75">
-              Enjoy a 7-day free trial, then keep the features you love with flexible plans
-              that match your release schedule.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href="/app"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-3 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/40 transition hover:shadow-primary/60"
-              >
-                Start for Free
-              </Link>
-            
+            <div className="space-y-4">
+              {[
+                {
+                  q: "Can I import my existing lyrics?",
+                  a: "Yes. Paste any draft directly into the generator to ask for rewrites, alternate choruses or translations in seconds.",
+                },
+                {
+                  q: "Does AiLyrics support multiple languages?",
+                  a: "Absolutely. Pick from a growing catalog of languages and eras; the generator respects rhyme and syllable patterns in each.",
+                },
+                {
+                  q: "How do collaborators leave feedback?",
+                  a: "Invite teammates to the app—every lyric has built-in commenting, liking and version history so decisions stay organized.",
+                },
+              ].map((item, index) => (
+                <details
+                  key={item.q}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-white/85 transition group-open:bg-white/10">
+                    <span>{item.q}</span>
+                    <span className="text-white/50 transition group-open:rotate-45">+</span>
+                  </summary>
+                  <div className="px-5 pb-5 text-sm text-white/70 [animation:fade-in-up_0.4s_ease-out_forwards]"
+                    style={{ animationDelay: `${index * 0.05}s` }}>
+                    {item.a}
+                  </div>
+                </details>
+              ))}
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="w-full border-t border-white/10 bg-white/5 py-8 text-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm md:flex-row">
-          <p>© {new Date().getFullYear()} AI Lyrics App. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <a className="transition hover:text-white" href="#features">
-              Features
-            </a>
-            <a className="transition hover:text-white" href="mailto:hello@ailyrics.app">
-              Contact
-            </a>
-            <Link className="transition hover:text-white" href="/app">
-              Go to the App →
-            </Link>
-          </div>
-        </div>
-      </footer>
     </AuroraBackground>
   );
 }

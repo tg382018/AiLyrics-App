@@ -25,6 +25,11 @@ export class LikesService {
     }
   }
 
+  async getLikeStatus(userId: string, songId: string) {
+    const existing = await this.likeModel.exists({ userId, songId });
+    return { liked: Boolean(existing) };
+  }
+
   async countLikes(songId: string): Promise<number> {
     return this.likeModel.countDocuments({ songId });
   }

@@ -38,6 +38,14 @@ export class UsersService {
 
     const saved = await newUser.save();
 
+    const apiBase = (
+      process.env.API_BASE_URL ??
+      process.env.BACKEND_URL ??
+      'http://localhost:4000/api'
+    ).replace(/\/$/, '');
+
+    const verificationUrl = `${apiBase}/auth/verify?token=${verificationToken}`;
+
     // ✅ Gerçek e-posta gönderimi
     await this.emailService.sendMail(
       saved.email,
@@ -45,7 +53,7 @@ export class UsersService {
       `
       <h2>AI Lyrics'e Hoş Geldin </h2>
       <p>Hesabını doğrulamak için aşağıdaki bağlantıya tıkla:</p>
-      <a href="http://localhost:3000/api/auth/verify?token=${verificationToken}"
+      <a href="${verificationUrl}"
          style="background:#4CAF50;color:white;padding:10px 16px;
          text-decoration:none;border-radius:6px;">Hesabımı Doğrula</a>
       <p style="margin-top:20px;">Eğer bu isteği sen yapmadıysan, bu e-postayı görmezden gel.</p>
@@ -69,7 +77,13 @@ export class UsersService {
     user.resetPasswordExpires = expireDate;
     await user.save();
 
-    const resetUrl = `http://localhost:3000/api/auth/reset-password?token=${resetToken}`;
+    const apiBase = (
+      process.env.API_BASE_URL ??
+      process.env.BACKEND_URL ??
+      'http://localhost:4000/api'
+    ).replace(/\/$/, '');
+
+    const resetUrl = `${apiBase}/auth/reset-password?token=${resetToken}`;
 
     await this.emailService.sendMail(
       user.email,

@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/common';
-import { ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Query,
+  Param,
+} from '@nestjs/common';
+import { ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SongsService } from './songs.service';
 import { CreateSongDto } from './dto/create-song.dto';
 import { GenerateSongDto } from './dto/generate-song.dto';
+import { ListSongsDto } from './dto/list-songs.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('songs')
@@ -23,8 +33,12 @@ export class SongsController {
 
   // 📜 Tüm şarkıları getir
   @Get()
-  async getAllSongs() {
-    return this.songsService.findAll();
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  async getAllSongs(@Query() query: ListSongsDto) {
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 10);
+    return this.songsService.findAll(page, limit);
   }
 
   // 🤖 AI ile şarkı oluşturma
@@ -36,20 +50,26 @@ export class SongsController {
     return this.songsService.generateSong(dto, req.user.userId);
   }
 
-    // ✅ 🔥 Kullanıcının kendi şarkıları
+  // ✅ 🔥 Kullanıcının kendi şarkıları
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @Get('my')
-  async getMySongs(@Request() req,
-  @Query('page') page = 1,
-  @Query('limit') limit = 10,
-) {
-    return this.songsService.findByUser(req.user.userId,Number(page), Number(limit));
+  async getMySongs(
+    @Request() req,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.songsService.findByUser(req.user.userId, Number(page), Number(limit));
   }
 
-    // 🔥 Popüler şarkılar
+  // 🔥 Popüler şarkılar
   @Get('popular')
   async getPopularSongs() {
     return this.songsService.findPopular();
+  }
+
+  @Get(':id')
+  async getSongById(@Param('id') id: string) {
+    return this.songsService.findById(id);
   }
 }

@@ -30,9 +30,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Image
               src="/ailyricslogo.png"
               alt="Ai Lyrics logo"
-              width={60}
-              height={60}
-              className="h-10 w-auto rounded-full bg-white/5 p-1.5 shadow-[0_0_26px_rgba(147,51,234,0.55)]"
+              width={80}
+              height={80}
+              className="h-14 w-auto"
               priority
             />
           </Link>
@@ -60,8 +60,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {user ? (
             <div className="flex items-center gap-4 text-sm">
-              <span className="hidden max-w-[160px] truncate text-white/70 md:inline">
-                {user.username ?? user.email}
+              <span className="hidden max-w-[200px] truncate text-white/70 md:inline">
+                {user.email}
               </span>
               <button
                 type="button"

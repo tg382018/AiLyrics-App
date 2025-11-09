@@ -20,9 +20,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <Image
             src="/ailyricslogo.png"
             alt="Ai Lyrics logo"
-            width={60}
-            height={60}
-            className="h-10 w-auto rounded-full bg-white/5 p-1.5 shadow-[0_0_26px_rgba(147,51,234,0.55)]"
+            width={80}
+            height={80}
+            className="h-14 w-auto"
             priority
           />
         </Link>

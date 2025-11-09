@@ -51,3 +51,16 @@ export class CommentsController {
     return this.commentsService.deleteComment(commentId, req.user.userId);
   }
 }
+
+@ApiTags('comments')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@Controller('comments')
+export class CommentsMeController {
+  constructor(private readonly commentsService: CommentsService) {}
+
+  @Get('me')
+  async getMyComments(@Request() req, @Query() pagination: PaginationDto) {
+    return this.commentsService.findByUser(req.user.userId, pagination);
+  }
+}
