@@ -27,26 +27,12 @@ async function bootstrap() {
     allowedOrigins.add(process.env.ADMIN_URL);
   }
 
+  const corsOrigins = Array.from(allowedOrigins).map((origin) =>
+    origin.replace(/\/$/, ''),
+  );
+
   app.enableCors({
-    origin(requestOrigin, callback) {
-      if (!requestOrigin) {
-        return callback(null, true);
-      }
-
-      const normalizedOrigin = requestOrigin.replace(/\/$/, '');
-      for (const allowed of allowedOrigins) {
-        const normalizedAllowed = allowed.replace(/\/$/, '');
-        if (
-          normalizedOrigin === normalizedAllowed ||
-          normalizedOrigin === normalizedAllowed.replace('https://', 'http://') ||
-          normalizedOrigin === normalizedAllowed.replace('http://', 'https://')
-        ) {
-          return callback(null, true);
-        }
-      }
-
-      return callback(new Error(`Origin ${requestOrigin} not allowed by CORS`));
-    },
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
