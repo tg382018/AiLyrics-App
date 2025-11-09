@@ -67,5 +67,10 @@ export type ApiComment = {
     username?: string;
     email?: string;
   };
+  song?: {
+    _id?: string;
+    title?: string;
+    createdBy?: string | ApiUser;
+  };
 };
 
