@@ -32,13 +32,19 @@ async function bootstrap() {
       if (!requestOrigin) {
         return callback(null, true);
       }
-      const sanitized = requestOrigin.replace(/\/$/, '');
-      const origins = Array.from(allowedOrigins).map((origin) =>
-        origin.replace(/\/$/, ''),
-      );
-      if (origins.includes(sanitized)) {
-        return callback(null, true);
+
+      const normalizedOrigin = requestOrigin.replace(/\/$/, '');
+      for (const allowed of allowedOrigins) {
+        const normalizedAllowed = allowed.replace(/\/$/, '');
+        if (
+          normalizedOrigin === normalizedAllowed ||
+          normalizedOrigin === normalizedAllowed.replace('https://', 'http://') ||
+          normalizedOrigin === normalizedAllowed.replace('http://', 'https://')
+        ) {
+          return callback(null, true);
+        }
       }
+
       return callback(new Error(`Origin ${requestOrigin} not allowed by CORS`));
     },
     credentials: true,
