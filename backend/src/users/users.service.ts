@@ -46,6 +46,14 @@ export class UsersService {
 
     const verificationUrl = `${apiBase}/auth/verify?token=${verificationToken}`;
 
+    const [primaryFrontendOrigin] = (
+      process.env.FRONTEND_URL ?? 'http://localhost:3005'
+    )
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const frontendOrigin = primaryFrontendOrigin ?? 'http://localhost:3005';
+
     // ✅ Gerçek e-posta gönderimi
     await this.emailService.sendMail(
       saved.email,
