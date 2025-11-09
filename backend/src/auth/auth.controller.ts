@@ -36,8 +36,13 @@ export class AuthController {
     const result = await this.authService.googleLogin(req.user);
 
     // 🎯 Kullanıcıyı frontend'e yönlendiriyoruz
-    const frontendUrl =
-      process.env.FRONTEND_URL ?? 'http://localhost:3005';
+    const [primaryFrontend] = (
+      process.env.FRONTEND_URL ?? 'http://localhost:3005'
+    )
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const frontendUrl = primaryFrontend ?? 'http://localhost:3005';
     const redirectUrl = `${frontendUrl.replace(/\/$/, '')}/app/login/success?token=${result.token}`;
     return res.redirect(redirectUrl);
   }
