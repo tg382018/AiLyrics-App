@@ -53,7 +53,7 @@ export class AuthController {
     const user = await this.usersService.register(dto);
     return {
       message:
-        'Kayıt başarılı! E-postanı kontrol et ve hesabını doğrula 📩',
+        'Registration successful! Check your email to verify your account 📩',
       email: user.email,
     };
   }
@@ -73,21 +73,21 @@ export class AuthController {
     if (!verified) {
       return res.send(`
         <div style="font-family:sans-serif;text-align:center;margin-top:100px">
-          <h2 style="color:#e53935;">❌ Geçersiz veya süresi dolmuş doğrulama linki</h2>
-          <p style="color:#555;">Lütfen e-posta adresinizi kontrol edin veya yeniden kayıt olun.</p>
+          <h2 style="color:#e53935;">❌ Invalid or expired verification link</h2>
+          <p style="color:#555;">Please check your inbox or register again.</p>
         </div>
       `);
     }
 
     return res.send(`
       <div style="font-family:sans-serif;text-align:center;margin-top:100px">
-        <h1 style="color:#2e7d32;">✅ E-posta başarıyla doğrulandı!</h1>
-        <p style="color:#555;">Artık hesabınız aktif. Giriş yapabilirsiniz 🎶</p>
-        <a href="https://ailyricsapp.com/login" 
+        <h1 style="color:#2e7d32;">✅ Email verified successfully!</h1>
+        <p style="color:#555;">Your account is now active. You can sign in.</p>
+        <a href="https://ai-lyrics.com/app/login" 
            style="display:inline-block;margin-top:20px;padding:10px 20px;
                   background:#4CAF50;color:white;text-decoration:none;
                   border-radius:6px;font-weight:600;">
-          Giriş Yap
+          Continue to Login
         </a>
       </div>
     `);

@@ -21,23 +21,23 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+      throw new UnauthorizedException('User not found.');
     }
 
     if (!user.isVerified) {
       throw new UnauthorizedException(
-        'E-posta adresiniz doğrulanmamış. Lütfen e-postanızı kontrol edin.',
+        'Your email address is not verified. Please check your inbox.',
       );
     }
 
     // 🧩 password opsiyonel olduğu için null check yapıyoruz
     if (!user.password) {
-      throw new UnauthorizedException('Bu hesap sadece Google ile giriş yapabilir.');
+      throw new UnauthorizedException('This account can only sign in with Google.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('E-posta veya şifre hatalı');
+      throw new UnauthorizedException('Incorrect email or password.');
     }
 
     const { password: _, ...result } = user.toObject();

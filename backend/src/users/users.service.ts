@@ -24,7 +24,7 @@ export class UsersService {
   async register(createUserDto: CreateUserDto): Promise<User> {
     const { email, username, password } = createUserDto;
     const existing = await this.userModel.findOne({ email });
-    if (existing) throw new ConflictException('Bu e-posta zaten kayıtlı.');
+    if (existing) throw new ConflictException('This email is already registered.');
 
     const hashed = await bcrypt.hash(password, 10);
     const verificationToken = randomBytes(32).toString('hex');
@@ -54,19 +54,22 @@ export class UsersService {
       .filter(Boolean);
     const frontendOrigin = primaryFrontendOrigin ?? 'http://localhost:3005';
 
-    // ✅ Gerçek e-posta gönderimi
     await this.emailService.sendMail(
       saved.email,
-      'AI Lyrics Hesabını Doğrula 🎵',
+      'Verify your AI Lyrics account 🎵',
       `
-      <h2>AI Lyrics'e Hoş Geldin </h2>
-      <p>Hesabını doğrulamak için aşağıdaki bağlantıya tıkla:</p>
+      <h2>Welcome to AI Lyrics!</h2>
+      <p>Tap the button below to verify your account:</p>
       <a href="${verificationUrl}"
          style="background:#4CAF50;color:white;padding:10px 16px;
-         text-decoration:none;border-radius:6px;">Hesabımı Doğrula</a>
-      <p style="margin-top:20px;">Eğer bu isteği sen yapmadıysan, bu e-postayı görmezden gel.</p>
+         text-decoration:none;border-radius:6px;">Verify my account</a>
+      <p style="margin-top:20px;">If you did not create this account, you can safely ignore this email.</p>
+      <p style="margin-top:24px;">Ready to continue?</p>
+      <a href="${frontendOrigin.replace(/\/$/, '')}/app/login"
+         style="display:inline-block;margin-top:8px;background:#6366f1;color:white;padding:10px 18px;
+         text-decoration:none;border-radius:6px;">Go to login</a>
       <br/>
-      <small>AI Lyrics Ekibi 🎶</small>
+      <small>AI Lyrics Team 🎶</small>
       `,
     );
 
@@ -75,7 +78,7 @@ export class UsersService {
 
    async requestPasswordReset(email: string): Promise<string> {
     const user = await this.userModel.findOne({ email });
-    if (!user) throw new BadRequestException('Bu e-posta adresi kayıtlı değil.');
+    if (!user) throw new BadRequestException('This email address is not registered.');
 
     const resetToken = randomBytes(32).toString('hex');
     const expireMs = Number(process.env.RESET_TOKEN_EXPIRES || 900000); // 15dk fallback
@@ -95,18 +98,18 @@ export class UsersService {
 
     await this.emailService.sendMail(
       user.email,
-      '🔑 Şifre Sıfırlama Talebi',
+      '🔑 Password reset request',
       `
-        <h2>Şifreni Sıfırlamak İçin</h2>
-        <p>Aşağıdaki bağlantıya tıklayarak yeni şifreni oluşturabilirsin:</p>
+        <h2>Reset your password</h2>
+        <p>Click the button below to choose a new password:</p>
         <a href="${resetUrl}"
            style="background:#2196f3;color:white;padding:10px 18px;
-           text-decoration:none;border-radius:6px;">Şifremi Sıfırla</a>
-        <p>Bu bağlantı 15 dakika geçerlidir.</p>
+           text-decoration:none;border-radius:6px;">Reset password</a>
+        <p>This link is valid for 15 minutes.</p>
       `,
     );
 
-    return 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.';
+    return 'Password reset link has been sent to your email.';
   }
 
   // ✅ Şifre Güncelleme
@@ -116,7 +119,7 @@ export class UsersService {
       resetPasswordExpires: { $gt: new Date() },
     });
 
-    if (!user) throw new BadRequestException('Geçersiz veya süresi dolmuş bağlantı.');
+    if (!user) throw new BadRequestException('Invalid or expired reset link.');
 
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
@@ -124,7 +127,7 @@ export class UsersService {
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    return 'Şifren başarıyla güncellendi 🎉';
+    return 'Your password has been updated successfully 🎉';
   }
 
   // ✅ Email doğrulama işlemi
@@ -142,19 +145,19 @@ export class UsersService {
   async login(loginUserDto: LoginUserDto): Promise<Omit<User, 'password'>> {
     const { email, password } = loginUserDto;
     const user = await this.userModel.findOne({ email });
-    if (!user) throw new UnauthorizedException('Kullanıcı bulunamadı.');
+    if (!user) throw new UnauthorizedException('User not found.');
 
     if (!user.isVerified)
       throw new UnauthorizedException(
-        'E-posta adresiniz doğrulanmamış. Lütfen e-postanızı kontrol edin.',
+        'Your email address is not verified. Please check your inbox.',
       );
 
-      if (!user.password) {
-  // Örneğin Google ile kayıt olmuş kullanıcılar
-  throw new UnauthorizedException('Bu hesap için şifreli giriş yapılamaz.');
-}
+    if (!user.password) {
+      // e.g. Google-only accounts
+      throw new UnauthorizedException('This account cannot sign in with a password.');
+    }
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) throw new UnauthorizedException('Hatalı şifre.');
+    if (!valid) throw new UnauthorizedException('Incorrect password.');
 
     const { password: _, ...result } = user.toObject() as any;
     return result;
