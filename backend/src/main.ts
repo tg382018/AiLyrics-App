@@ -7,17 +7,27 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
- app.enableCors({
-  origin: [
+  const allowedOrigins = new Set([
     'http://localhost:3000',
     'http://localhost:3005',
     'http://localhost:4000',
     'http://localhost:4001',
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-});
+  ]);
+
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.add(process.env.FRONTEND_URL);
+  }
+
+  if (process.env.ADMIN_URL) {
+    allowedOrigins.add(process.env.ADMIN_URL);
+  }
+
+  app.enableCors({
+    origin: Array.from(allowedOrigins),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // ✅ API prefix
   app.setGlobalPrefix('api');
