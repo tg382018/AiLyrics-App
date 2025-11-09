@@ -1,38 +1,31 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private transporter;
   private readonly logger = new Logger(EmailService.name);
+  private readonly resend: Resend;
 
   constructor() {
-    const port = Number(process.env.SMTP_PORT ?? 587);
-    const secure = port === 465;
-
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port,
-      secure,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT ?? 10000),
-      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT ?? 10000),
-      tls: secure
-        ? undefined
-        : {
-            // Gmail 587 STARTTLS
-            ciphers: 'SSLv3',
-          },
-    });
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      this.logger.warn('RESEND_API_KEY is not set. Emails will not be sent.');
+    }
+    this.resend = new Resend(apiKey);
   }
 
   async sendMail(to: string, subject: string, html: string) {
     try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
+      if (!process.env.RESEND_API_KEY) {
+        this.logger.warn(`Skipping email to ${to}; RESEND_API_KEY missing.`);
+        return;
+      }
+
+      await this.resend.emails.send({
+        from:
+          process.env.RESEND_FROM ??
+          process.env.SMTP_FROM ??
+          'AI Lyrics <no-reply@ai-lyrics.com>',
         to,
         subject,
         html,
