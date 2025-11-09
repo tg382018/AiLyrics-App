@@ -7,15 +7,20 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = new Set([
+  const allowedOriginEnv = process.env.FRONTEND_URL ?? process.env.CLIENT_URL;
+  const allowedOrigins = new Set<string>([
     'http://localhost:3000',
     'http://localhost:3005',
     'http://localhost:4000',
     'http://localhost:4001',
   ]);
 
-  if (process.env.FRONTEND_URL) {
-    allowedOrigins.add(process.env.FRONTEND_URL);
+  if (allowedOriginEnv) {
+    allowedOriginEnv
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+      .forEach((origin) => allowedOrigins.add(origin));
   }
 
   if (process.env.ADMIN_URL) {
@@ -23,7 +28,19 @@ async function bootstrap() {
   }
 
   app.enableCors({
-    origin: Array.from(allowedOrigins),
+    origin(requestOrigin, callback) {
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+      const sanitized = requestOrigin.replace(/\/$/, '');
+      const origins = Array.from(allowedOrigins).map((origin) =>
+        origin.replace(/\/$/, ''),
+      );
+      if (origins.includes(sanitized)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${requestOrigin} not allowed by CORS`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
