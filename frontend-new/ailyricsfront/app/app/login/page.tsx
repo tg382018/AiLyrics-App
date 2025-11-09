@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 
 import { GOOGLE_AUTH_URL, REDIRECT_STORAGE_KEY } from "@/lib/api";
 import { AuthShell } from "../_components/auth-shell";
@@ -12,6 +12,20 @@ import { useAuth } from "../_contexts/auth-context";
 const DEFAULT_REDIRECT = "/app/me";
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#0A0015] text-white/70">
+          Loading your workspace…
+        </div>
+      }
+    >
+      <LoginView />
+    </Suspense>
+  );
+}
+
+function LoginView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = useMemo(
