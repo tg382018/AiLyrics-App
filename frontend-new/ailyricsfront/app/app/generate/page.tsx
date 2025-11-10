@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { API_BASE_URL } from "@/lib/api";
 
@@ -93,6 +93,24 @@ export default function GenerateLyricsPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiSong | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showProgress, setShowProgress] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const progressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      if (progressTimeoutRef.current) {
+        clearTimeout(progressTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const disabled = useMemo(() => {
     return loading || !token;
@@ -125,6 +143,24 @@ export default function GenerateLyricsPage() {
     setSuccess(null);
     setResult(null);
 
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    if (progressTimeoutRef.current) {
+      clearTimeout(progressTimeoutRef.current);
+      progressTimeoutRef.current = null;
+    }
+    setShowProgress(true);
+    setProgress(4);
+    const startTime = Date.now();
+    const targetDuration = 70_000;
+    progressIntervalRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const tentative = Math.min(97, (elapsed / targetDuration) * 100);
+      setProgress(tentative);
+    }, 250);
+
     try {
       const res = await fetch(`${API_BASE_URL}/songs/generate`, {
         method: "POST",
@@ -150,6 +186,16 @@ export default function GenerateLyricsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate lyrics.");
     } finally {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setProgress(100);
+      progressTimeoutRef.current = window.setTimeout(() => {
+        setShowProgress(false);
+        setProgress(0);
+        progressTimeoutRef.current = null;
+      }, 600);
       setLoading(false);
     }
   };
@@ -322,6 +368,20 @@ export default function GenerateLyricsPage() {
                 View my previous prompts →
               </Link>
             </div>
+
+            {showProgress ? (
+              <div className="md:col-span-2 space-y-2">
+                <div className="relative h-2 overflow-hidden rounded-full border border-white/10 bg-white/5">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-fuchsia-400 via-purple-400 to-sky-400 transition-[width] duration-300 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-center text-xs text-white/60">
+                  Crafting your lyrics…
+                </p>
+              </div>
+            ) : null}
 
             {error ? (
               <div className="md:col-span-2 rounded-2xl bg-red-500/10 px-4 py-2 text-sm text-red-200">
